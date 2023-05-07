@@ -1,6 +1,8 @@
-﻿namespace API_Dotnet6.Domain;
+﻿using Flunt.Notifications;
 
-public abstract class Entity
+namespace API_Dotnet6.Domain;
+
+public abstract class Entity : Notifiable<Notification>
 {
     public Entity()
     {
