@@ -1,6 +1,5 @@
-﻿using API_Dotnet6.Infra.Data;
-using API_Dotnet6.Domain.Products;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace API_Dotnet6.Endpoints.Employees;
 
@@ -15,7 +14,20 @@ public class EmployeesPost
         var result = userManager.CreateAsync(user, employeeRequest.Password).Result;
 
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors.First());
+            return Results.ValidationProblem(result.Errors.ConvertToProblemDetails());
+
+        var userClaims = new List<Claim> 
+        {
+            new Claim("EmployeeCode", employeeRequest.EmployeeCode),
+            new Claim("Name", employeeRequest.Name)
+        };
+
+        var claimResult = 
+            userManager.AddClaimsAsync(user, userClaims).Result;
+
+        if (!claimResult.Succeeded)
+            return Results.BadRequest(claimResult.Errors.First());
+
 
         return Results.Created($"/employees/{user.Id}", user.Id);
     }
